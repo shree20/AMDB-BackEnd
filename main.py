@@ -33,6 +33,10 @@ class Item(BaseModel):
 class RemoveID(BaseModel):
     id: int
 
+@app.get("/")
+def home():
+    return {"message":"Hello"}
+
 @app.get("/amdb/")
 async def getmovie(movietitle: str, request: Request):
     client_host = request.client.host
