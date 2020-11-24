@@ -1,5 +1,4 @@
 import json
-import optional as optional
 from fastapi import FastAPI, Request, Response
 from businessLayer.movie import get_movie_json_data, bulk_insert, insertmovie, updatemovie, deletemovie
 from typing import Optional
