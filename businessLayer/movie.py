@@ -1,5 +1,5 @@
 
-from db.movie import db_main, insert_mov
+from db.movie import db_main, insert_mov, db_user
 
 
 def get_movie_json_data(movietitle):
@@ -17,9 +17,17 @@ def get_movie_json_data(movietitle):
         jsonresult.append(dicts)
     return jsonresult
 
-def bulk_insert():
-    insert_mov(None,None)
 
+def get_user_json_data(model):
+    result = db_user(model)
+    if result:
+        dict = {
+            'username': result[0],
+            'password': result[1],
+            'isAdmin': result[2],
+        }
+        return dict
+    return None
 
 def insertmovie(model):
     db_main('',True,False,False, model)
@@ -29,3 +37,8 @@ def updatemovie(model):
 
 def deletemovie(id):
     return db_main('', False, False, True, id)
+
+def isuser(model):
+    return db_user(model)
+
+

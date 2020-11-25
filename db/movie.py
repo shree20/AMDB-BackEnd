@@ -1,22 +1,9 @@
 import json
-
 import _sqlite3
-from model.movie import Movie
 
 
 def insert_mov(conn,mov):
-    # database = "movies.db"
-    # create a database connection
-    # conn = create_connection(database)
     cur = conn.cursor()
-    # cur.execute("DROP TABLE movies")
-    # cur.execute("""CREATE TABLE movies (
-    #     name text,
-    #     imdb_score text,
-    #     director text,
-    #     popularity text,
-    #     genre text
-    #     )""")
     cur.execute("INSERT INTO movies VALUES (:name, :imdb_score, :director, :popularity, :genre)",
                 {'name': mov['name'], 'director': mov['director'], 'imdb_score': mov['imdb_score'],
                  'popularity': mov['popularity'],'genre': json.dumps(mov['genre'])
@@ -35,7 +22,6 @@ def create_connection(db_file):
         cur = conn.cursor()
     except _sqlite3.Error as e:
         print(e)
-
     return conn
 
 
@@ -49,20 +35,11 @@ def get_movies_by_name(conn, name):
     cur = conn.cursor()
     cur.execute("SELECT rowid,* FROM movies WHERE name LIKE:name LIMIT 3", {'name': '%' + name + '%'})
     res = cur.fetchall()
-    #print(res)
     return res
 
 
 def update_mov(conn, mov):
     cur = conn.cursor()
-    # cur.execute("DROP TABLE movies")
-    # cur.execute("""CREATE TABLE movies (
-    #     name text,
-    #     imdb_score text,
-    #     director text,
-    #     popularity text,
-    #     genre text
-    #     )""")
     cur.execute("""UPDATE movies SET name = :name , director = :director  , imdb_score = :imdb_score ,popularity = :popularity 
                  WHERE rowid = :id""",
                 {'name': mov['name'], 'director': mov['director'], 'imdb_score': mov['imdb_score'],
@@ -70,6 +47,15 @@ def update_mov(conn, mov):
                  })
     cur.execute("SELECT rowid,* FROM movies WHERE rowid = :id", {'id': mov['id']})
     return cur.fetchall()
+
+def setupUsers(conn,model):
+    cur = conn.cursor()
+    cur.execute("INSERT INTO users VALUES (:username, :password, :isAdmin)",
+                {'username': model['username'], 'password': model['password'], 'isAdmin': model['isAdmin']
+                 })
+    cur.execute("SELECT * FROM users ")
+    return cur.fetchall()
+
 
 def delete_mov(conn,id):
     cur = conn.cursor()
@@ -80,7 +66,6 @@ def db_main(title='', isInsert=False, isUpdate=False, isDelete=False,model=None)
 
     # create a database connection
     conn = create_connection(database)
-    # conn.commit()
     with conn:
         if isInsert:
             return  insert_mov(conn, model)
@@ -88,15 +73,17 @@ def db_main(title='', isInsert=False, isUpdate=False, isDelete=False,model=None)
             return update_mov(conn, model)
         if isDelete:
             return delete_mov(conn, model)
-        # with open('datadb.json', 'r') as f:
-        #     movies = json.load(f)
-        #     for movie in movies:
-        #         insert_mov(conn,movie)
         return get_movies_by_name(conn, title)
 
+def checkUser(conn, model):
+    cur = conn.cursor()
+    cur.execute("Select * from users where username=:username AND password=:password", {'username': model['username'], 'password': model['password'] })
+    return cur.fetchone()
 
-# def get_movies(title):
-#     return db_main(title)
+def db_user(model):
+    database = "movies.db"
+    # create a database connection
+    conn = create_connection(database)
+    with conn:
+        return checkUser(conn, model)
 
-if __name__ == '__main__':
-    db_main('w')

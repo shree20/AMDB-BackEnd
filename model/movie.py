@@ -1,9 +1,14 @@
-class Movie:
-    """A sample Employee class"""
+from typing import Optional
+from pydantic import BaseModel
 
-    def __init__(self, name, director):
-        self.name = name
-        self.director = director
 
-    def __repr__(self):
-        return "Movie('{}', '{}', {})".format(self.title, self.director)
+class Movie(BaseModel):
+    name: str
+    imdb_score: str
+    director: str
+    popularity: str
+    genre : list
+    id: Optional[int] = 0
+
+class RemoveMovie(BaseModel):
+    id: int

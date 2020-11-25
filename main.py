@@ -1,16 +1,9 @@
-from fastapi import FastAPI, Request, Response
-from businessLayer.movie import get_movie_json_data, bulk_insert, insertmovie, updatemovie, deletemovie
-from typing import Optional
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from businessLayer.movie import get_movie_json_data, insertmovie, updatemovie, deletemovie,get_user_json_data
 from fastapi.middleware.cors import CORSMiddleware
-
+from model import movie, users
 
 app = FastAPI()
-
-# origins = [
-#     "http://localhost",
-#     "http://localhost:3000",
-# ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,20 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Item(BaseModel):
-    name: str
-    imdb_score: str
-    director: str
-    popularity: str
-    genre : list
-    id: Optional[int] = 0
-
-class RemoveID(BaseModel):
-    id: int
-
 @app.get("/")
 def home():
-    return {"message":"Hello"}
+    return {"message":"Test API"}
 
 @app.get("/amdb/")
 async def getmovie(movietitle: str, request: Request):
@@ -41,27 +23,29 @@ async def getmovie(movietitle: str, request: Request):
     return {"client_host": client_host, "result": get_movie_json_data(movietitle)}
 
 @app.post("/amdb/addmovie")
-async def addmovie(item: Item):
+async def addmovie(item: movie.Movie):
     data = item.dict()
     insertmovie(data)
     return {"Result":"Success"}
 
 @app.post("/amdb/editmovie")
-async def editmovie(item: Item):
+async def editmovie(item: movie.Movie):
     data = item.dict()
     updatemovie(data)
     return {"Result":"Success"}
 
 @app.post("/amdb/removemovie")
-async def removemovie(item: RemoveID):
+async def removemovie(item: movie.RemoveMovie):
     data = item.dict()
     deletemovie(data['id'])
     return {"Result":"Success"}
 
 
-@app.get("/amdb/insert")
-def read_root():
-    return { "result": bulk_insert()}
+@app.post("/amdb/isuser")
+async def isUser(item: users.User):
+    data = item.dict()
+    resp = get_user_json_data(data)
+    return {"Result":resp}
 
 
 if __name__ == '__main__':
@@ -69,5 +53,5 @@ if __name__ == '__main__':
 
 
 
-"""uvicorn main: app - -reload"""
+"""uvicorn main: app --reload"""
 
